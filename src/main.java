@@ -44,7 +44,6 @@ public class main{
                 }
             }
         }
-        System.out.println(token);
         return token;
     }
     private static List read(List<String> tokens) throws Exception {
@@ -65,19 +64,63 @@ public class main{
             return atom(token);
         }
     }
-
     private static List parse(String code) throws Exception {
         return read(new ArrayList<String>(Arrays.asList(tokenize(code))));
     }
 
-    private static void process(List instructions){
-        for (int i = 0; i < instructions.size(); i++){
-            if (instructions.get(i) instanceof List){
-                process(((List) instructions.get(i)));
-            }else {
-                System.out.println("Easy process");
+    public static boolean checkIfSimpleEnough(Object something){
+        return something instanceof List;
+    }
+
+    private static List simplify(List toBeSimplified){
+        for (int i = 1; i<toBeSimplified.size(); i++){
+            if (toBeSimplified.get(i) instanceof List){
+                Object objectToSimplified = toBeSimplified.get(i);
+                System.out.println(objectToSimplified.toString() + "Must be made simpler");
+
+                if (checkIfSimpleEnough(toBeSimplified)){
+                    simplify(((List) toBeSimplified.get(i)));
+
+                }
+                System.out.println("Se llegó");
+                Collections.replaceAll(toBeSimplified, toBeSimplified.get(i), process(((List) toBeSimplified.get(i))));
             }
         }
+        System.out.println(toBeSimplified + "new stuff");
+        return toBeSimplified;
+    }
+
+    private static Number process(List instructions){
+        System.out.println("Se intentó");
+        String toCheck = instructions.get(0).toString();
+        instructions.remove(0);
+        Integer result = 0;
+        switch (toCheck){
+            case "+":
+                for (Object i: instructions){
+                    result += Integer.parseInt(i.toString());
+                }
+                break;
+            case "-":
+                for (Object i: instructions){
+                    result -= Integer.parseInt(i.toString());
+                }
+                break;
+            case "*":
+                result = 1;
+                for (Object i: instructions){
+                    result *= Integer.parseInt(i.toString());
+                    System.out.println(result);
+                }
+                break;
+            case "/":
+                result = 1;
+                for (Object i: instructions){
+                    result /= Integer.parseInt(i.toString());
+                }
+                break;
+        }
+        return result;
     }
 
     public static void main(String[] args) {
@@ -87,13 +130,13 @@ public class main{
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             System.out.println("Ingrese algo");
             code = scanner.nextLine();
-            System.out.println(Arrays.toString(tokenize(code)));
             try {
-                System.out.println(parse(code));
-                trim(parse(code));
-                process(trim(parse(code)));
+                System.out.println(trim(parse(code)));
+                System.out.println(simplify(trim(parse(code))));
+                System.out.println(process(simplify(trim(parse(code)))));
             }catch (Exception e){
                 System.out.println("Something went really wrong");
+                e.printStackTrace();
             }
         }while (true);
     }
