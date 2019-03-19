@@ -23,14 +23,20 @@ public class Functions {
                 '}';
     }
 
-    public List process(ArrayList<Object> values){
-        List<Object> canBeProcessed = funcion;
-        int j = 0;
-        for (Object i: parametros){
-            Collections.replaceAll(canBeProcessed, i, values.get(j));
-            j ++;
+    public List replace(ArrayList<Object> values, List instructions){
+        List<Object> mustBeProcessed = instructions;
+        System.out.println(mustBeProcessed + "Has to change");
+        for (Object i :mustBeProcessed){
+            if (i instanceof List){
+                replace(values, (List)i);
+            }
+            int k = 0;
+            for (Object j : parametros){
+                Collections.replaceAll(instructions, j, values.get(k));
+                k++;
+            }
         }
-        return canBeProcessed;
+        return mustBeProcessed;
     }
 
     public String getNombre() {

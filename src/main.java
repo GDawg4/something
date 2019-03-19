@@ -110,28 +110,28 @@ public class main{
     public static Number processArithmetic(List instructions){
         String toCheck = instructions.get(0).toString();
         instructions.remove(0);
-        Integer result = 0;
+        Double result = 0.0;
         switch (toCheck){
             case "+":
                 for (Object i: instructions){
-                    result += Integer.parseInt(i.toString());
+                    result += Double.parseDouble(i.toString());
                 }
                 break;
             case "-":
                 for (Object i: instructions){
-                    result -= Integer.parseInt(i.toString());
+                    result -= Double.parseDouble(i.toString());
                 }
-                result += 2*Integer.parseInt(instructions.get(0).toString());
+                result += 2*Double.parseDouble(instructions.get(0).toString());
                 break;
             case "*":
-                result = 1;
+                result = 1.0;
                 for (Object i: instructions){
-                    result *= Integer.parseInt(i.toString());
+                    result *= Double.parseDouble(i.toString());
                 }
                 break;
             case "/":
-                Integer firstDigit = Integer.parseInt(instructions.get(0).toString());
-                Integer secondDigit = Integer.parseInt(instructions.get(1).toString());
+                Double firstDigit = Double.parseDouble(instructions.get(0).toString());
+                Double secondDigit = Double.parseDouble((instructions.get(1).toString()));
                 result = firstDigit/secondDigit;
                 break;
         }
@@ -149,15 +149,30 @@ public class main{
             }else {
                 commandToExecute = testToCast.toString();
             }
+            String firstComparable =((List)((List) instructionsCond.get(i)).get(0)).get(1).toString();
+            String secondComparable = ((List)((List) instructionsCond.get(i)).get(0)).get(2).toString();
 
             switch (commandToExecute){
+
                 case "=":
-                    String firstComparable =((List)((List) instructionsCond.get(i)).get(0)).get(1).toString();
-                    String secondComparable = ((List)((List) instructionsCond.get(i)).get(0)).get(2).toString();
                     if (firstComparable.compareTo(secondComparable) == 0){
                         return Integer.parseInt(((List) instructionsCond.get(i)).get(1).toString());
                     }
                     break;
+
+                case ">":
+                    if (firstComparable.compareTo(secondComparable) > 1){
+                        return Integer.parseInt(((List) instructionsCond.get(i)).get(1).toString());
+                    }
+                    break;
+
+                case "<":
+                    if (firstComparable.compareTo(secondComparable) < 1){
+                        return Integer.parseInt(((List) instructionsCond.get(i)).get(1).toString());
+                    }
+                    break;
+                case "T":
+                    return Integer.parseInt(((List) instructionsCond.get(i)).get(1).toString());
             }
         }
         return 42;
@@ -180,13 +195,17 @@ public class main{
                     allFunctions.put(newFunction.getNombre(), newFunction);
 
                 } else if (allFunctions.containsKey(trim(parse(code)).get(0).toString())){
+                    System.out.println("Found it");
                     ArrayList<Object> values = new ArrayList();
                     Functions functionToDo = allFunctions.get(trim(parse(code)).get(0).toString());
 
                     for (Object i: (List)trim(parse(code)).get(1)){
                         values.add(i);
                     }
-                    System.out.println(processArithmetic(simplify(functionToDo.process(values))));
+                    System.out.println(processArithmetic(simplify(functionToDo.replace(values, functionToDo.getFuncion()))));
+                }
+                else{
+                    System.out.println(processArithmetic(simplify(trim(parse(code)))));
                 }
             }catch (Exception e){
                 System.out.println("Something went really wrong");
