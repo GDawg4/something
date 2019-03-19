@@ -4,6 +4,7 @@ public class main{
     private static String[] tokenize(String code) {
         return code.replaceAll("\\(", " ( ").replaceAll("\\)", " ) ").trim().split("\\s+");
     }
+
     private static List atom(String token) {
         List dummyList = new ArrayList<>();
         try {
@@ -27,6 +28,7 @@ public class main{
             }
         }
     }
+
     private static List trim(List token){
         for (int i = 0; i< token.size(); i++){
             if (token.get(i) instanceof List){
@@ -42,6 +44,7 @@ public class main{
         }
         return token;
     }
+
     private static List read(List<String> tokens) throws Exception {
         if (tokens.isEmpty()) {
             throw new IllegalArgumentException("unexpected EOF while reading");
@@ -60,9 +63,11 @@ public class main{
             return atom(token);
         }
     }
+
     private static List parse(String code) throws Exception {
         return read(new ArrayList<String>(Arrays.asList(tokenize(code))));
     }
+
     public static boolean isSimpleEnough(Object something){
         return something instanceof List;
     }
@@ -102,7 +107,7 @@ public class main{
         return toBeSimplified;
     }
 
-    private static Number processArithmetic(List instructions){
+    public static Number processArithmetic(List instructions){
         String toCheck = instructions.get(0).toString();
         instructions.remove(0);
         Integer result = 0;
@@ -159,14 +164,30 @@ public class main{
     }
 
     public static void main(String[] args) {
+        HashMap<String, Functions> allFunctions = new HashMap<>();
+
         do {
             String code;
             Scanner scanner = new Scanner(System.in);
             System.out.println("Ingrese algo");
             code = scanner.nextLine();
             try {
-                System.out.println(trim(parse(code)) + "Pre");
-                System.out.println(simplify(trim(parse(code))) + "final");
+                System.out.println(trim(parse(code)));
+                if (trim(parse(code)).get(0).equals("defun")){
+                    Functions newFunction = new Functions(trim(parse(code)).get(1).toString(),
+                            (List) trim(parse(code)).get(3),
+                            (List) trim(parse(code)).get(2));
+                    allFunctions.put(newFunction.getNombre(), newFunction);
+
+                } else if (allFunctions.containsKey(trim(parse(code)).get(0).toString())){
+                    ArrayList<Object> values = new ArrayList();
+                    Functions functionToDo = allFunctions.get(trim(parse(code)).get(0).toString());
+
+                    for (Object i: (List)trim(parse(code)).get(1)){
+                        values.add(i);
+                    }
+                    System.out.println(processArithmetic(simplify(functionToDo.process(values))));
+                }
             }catch (Exception e){
                 System.out.println("Something went really wrong");
                 e.printStackTrace();
