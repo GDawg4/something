@@ -1,11 +1,13 @@
 import java.util.*;
 
 public class main{
+    static HashMap<String, Functions> allFunctions = new HashMap<>();
+
     private static String[] tokenize(String code) {
         return code.replaceAll("\\(", " ( ").replaceAll("\\)", " ) ").trim().split("\\s+");
     }
 
-    private static List atom(String token) {
+    static List atom(String token) {
         List dummyList = new ArrayList<>();
         try {
             Integer.parseInt(token);
@@ -74,7 +76,10 @@ public class main{
 
     private static List simplify(List toBeSimplified){
         System.out.println(toBeSimplified.get(0) + " Primera cosa");
-        List original = toBeSimplified;
+
+        if (toBeSimplified.size() == 1){
+            System.out.println("just this");
+        }
 
         if (!toBeSimplified.get(0).toString().equals("cond")){
             for (int i = 0; i<toBeSimplified.size(); i++){
@@ -88,6 +93,7 @@ public class main{
                     System.out.println("Procesando");
                     System.out.println(toBeSimplified.get(i) + " En esto estamos");
                     System.out.println(toBeSimplified + " Antes");
+
                     if (toBeSimplified.get(i) instanceof  List && ((List) toBeSimplified.get(i)).size() == 1){
                         Collections.replaceAll(toBeSimplified, toBeSimplified.get(i), ((List) toBeSimplified.get(i)).get(0));
                     }else {
@@ -100,8 +106,12 @@ public class main{
         else{
             System.out.println("Cond here");
             System.out.println(toBeSimplified + " Esto se hará simple");
+            System.out.println(processConditionals(toBeSimplified) + " saliendo del cond");
             Collections.replaceAll(toBeSimplified, toBeSimplified.get(1), processConditionals((toBeSimplified)));
             toBeSimplified.remove(0);
+            while (toBeSimplified.size() > 1){
+                toBeSimplified.remove(toBeSimplified.size()-1);
+            }
             System.out.println(toBeSimplified + "Esto queda");
         }
         return toBeSimplified;
@@ -134,15 +144,18 @@ public class main{
                 Double secondDigit = Double.parseDouble((instructions.get(1).toString()));
                 result = firstDigit/secondDigit;
                 break;
+
         }
         return result;
     }
 
     private static Number processConditionals(List instructionsCond){
+        System.out.println(instructionsCond + " Instrucciones cond");
 
         for (int i = 1; i < instructionsCond.size(); i++){
             String commandToExecute; //definitely not number 66
             Object testToCast = ((List)((List) instructionsCond.get(i)).get(0)).get(0);
+            System.out.println(testToCast + " por acá");
 
             if (((List) instructionsCond.get(i)).get(0).toString().equals("F") || ((List) instructionsCond.get(i)).get(0).toString().equals("T")){
                 commandToExecute = ((List) instructionsCond.get(i)).get(0).toString();
@@ -175,11 +188,10 @@ public class main{
                     return Integer.parseInt(((List) instructionsCond.get(i)).get(1).toString());
             }
         }
-        return 42;
+        return 0;
     }
 
     public static void main(String[] args) {
-        HashMap<String, Functions> allFunctions = new HashMap<>();
 
         do {
             String code;
