@@ -1,12 +1,9 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.*;
 
 public class main{
     private static String[] tokenize(String code) {
         return code.replaceAll("\\(", " ( ").replaceAll("\\)", " ) ").trim().split("\\s+");
     }
-
     private static List atom(String token) {
         List dummyList = new ArrayList<>();
         try {
@@ -30,7 +27,6 @@ public class main{
             }
         }
     }
-
     private static List trim(List token){
         for (int i = 0; i< token.size(); i++){
             if (token.get(i) instanceof List){
@@ -67,31 +63,46 @@ public class main{
     private static List parse(String code) throws Exception {
         return read(new ArrayList<String>(Arrays.asList(tokenize(code))));
     }
-
-    public static boolean checkIfSimpleEnough(Object something){
+    public static boolean isSimpleEnough(Object something){
         return something instanceof List;
     }
 
     private static List simplify(List toBeSimplified){
-        for (int i = 1; i<toBeSimplified.size(); i++){
-            if (toBeSimplified.get(i) instanceof List){
-                Object objectToSimplified = toBeSimplified.get(i);
-                System.out.println(objectToSimplified.toString() + "Must be made simpler");
+        System.out.println(toBeSimplified.get(0) + " Primera cosa");
+        List original = toBeSimplified;
 
-                if (checkIfSimpleEnough(toBeSimplified)){
-                    simplify(((List) toBeSimplified.get(i)));
+        if (!toBeSimplified.get(0).toString().equals("cond")){
+            for (int i = 0; i<toBeSimplified.size(); i++){
+                if (toBeSimplified.get(i) instanceof List){
+                    Object objectToSimplified = toBeSimplified.get(i);
+                    System.out.println(objectToSimplified.toString() + "Must be made simpler");
 
+                    if (isSimpleEnough(toBeSimplified)){
+                        simplify(((List) toBeSimplified.get(i)));
+                    }
+                    System.out.println("Procesando");
+                    System.out.println(toBeSimplified.get(i) + " En esto estamos");
+                    System.out.println(toBeSimplified + " Antes");
+                    if (toBeSimplified.get(i) instanceof  List && ((List) toBeSimplified.get(i)).size() == 1){
+                        Collections.replaceAll(toBeSimplified, toBeSimplified.get(i), ((List) toBeSimplified.get(i)).get(0));
+                    }else {
+                        Collections.replaceAll(toBeSimplified, toBeSimplified.get(i), processArithmetic(((List) toBeSimplified.get(i))));
+                    }
+                    System.out.println(toBeSimplified + " Despues");
                 }
-                System.out.println("Se llegó");
-                Collections.replaceAll(toBeSimplified, toBeSimplified.get(i), process(((List) toBeSimplified.get(i))));
             }
         }
-        System.out.println(toBeSimplified + "new stuff");
+        else{
+            System.out.println("Cond here");
+            System.out.println(toBeSimplified + " Esto se hará simple");
+            Collections.replaceAll(toBeSimplified, toBeSimplified.get(1), processConditionals((toBeSimplified)));
+            toBeSimplified.remove(0);
+            System.out.println(toBeSimplified + "Esto queda");
+        }
         return toBeSimplified;
     }
 
-    private static Number process(List instructions){
-        System.out.println("Se intentó");
+    private static Number processArithmetic(List instructions){
         String toCheck = instructions.get(0).toString();
         instructions.remove(0);
         Integer result = 0;
@@ -105,35 +116,57 @@ public class main{
                 for (Object i: instructions){
                     result -= Integer.parseInt(i.toString());
                 }
+                result += 2*Integer.parseInt(instructions.get(0).toString());
                 break;
             case "*":
                 result = 1;
                 for (Object i: instructions){
                     result *= Integer.parseInt(i.toString());
-                    System.out.println(result);
                 }
                 break;
             case "/":
-                result = 1;
-                for (Object i: instructions){
-                    result /= Integer.parseInt(i.toString());
-                }
+                Integer firstDigit = Integer.parseInt(instructions.get(0).toString());
+                Integer secondDigit = Integer.parseInt(instructions.get(1).toString());
+                result = firstDigit/secondDigit;
                 break;
         }
         return result;
+    }
+
+    private static Number processConditionals(List instructionsCond){
+
+        for (int i = 1; i < instructionsCond.size(); i++){
+            String commandToExecute; //definitely not number 66
+            Object testToCast = ((List)((List) instructionsCond.get(i)).get(0)).get(0);
+
+            if (((List) instructionsCond.get(i)).get(0).toString().equals("F") || ((List) instructionsCond.get(i)).get(0).toString().equals("T")){
+                commandToExecute = ((List) instructionsCond.get(i)).get(0).toString();
+            }else {
+                commandToExecute = testToCast.toString();
+            }
+
+            switch (commandToExecute){
+                case "=":
+                    String firstComparable =((List)((List) instructionsCond.get(i)).get(0)).get(1).toString();
+                    String secondComparable = ((List)((List) instructionsCond.get(i)).get(0)).get(2).toString();
+                    if (firstComparable.compareTo(secondComparable) == 0){
+                        return Integer.parseInt(((List) instructionsCond.get(i)).get(1).toString());
+                    }
+                    break;
+            }
+        }
+        return 42;
     }
 
     public static void main(String[] args) {
         do {
             String code;
             Scanner scanner = new Scanner(System.in);
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             System.out.println("Ingrese algo");
             code = scanner.nextLine();
             try {
-                System.out.println(trim(parse(code)));
-                System.out.println(simplify(trim(parse(code))));
-                System.out.println(process(simplify(trim(parse(code)))));
+                System.out.println(trim(parse(code)) + "Pre");
+                System.out.println(simplify(trim(parse(code))) + "final");
             }catch (Exception e){
                 System.out.println("Something went really wrong");
                 e.printStackTrace();
